@@ -1,0 +1,12 @@
+main {
+  min-height: 720px;
+}
+
+.nav-wrapper {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.error-text {
+  margin-left: 16px;
+}
