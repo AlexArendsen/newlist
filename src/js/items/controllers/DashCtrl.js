@@ -1,17 +1,17 @@
 app.controller("DashController", ["$scope", "ItemService", function($scope, ItemService){
-  $scope.items = []
-  ItemService.dump(function(items){
-    $scope.items = items
-  })
 
-  $scope.sid = null       // Selected item ID number, isolated for efficiency
-  $scope.selected = null  // Selected item object
-  $scope.currentItem = function(v,i,a){ return v.parent==$scope.sid }
+  // Get items from server
+  $scope.items = []
+  ItemService.dump(function(items){ $scope.items = items })
+
+  // Set up views
+  $scope.tabs = [null]  // Default tab shows top-level items
+  $scope.currentTab = 0;
+  $scope.currentItem = function(v,i,a){ return (!(titem=$scope.tabs[$scope.currentTab]))?v.parent==null:v.parent==titem.id }
 
   $scope.selectItem = function(item) {
-    item.parent_object = $scope.selected
-    $scope.selected = item
-    $scope.sid = item.id
+    item.parent_object = $scope.tabs[$scope.currentTab]
+    $scope.tabs[$scope.currentTab] = item
   }
 
   $scope.goBack = function() {
