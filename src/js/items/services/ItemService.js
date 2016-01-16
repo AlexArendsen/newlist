@@ -16,6 +16,15 @@ app.factory('ItemService', ["HTTPService", "ErrorService", function(HTTPService,
         callback,
         "There was an error while retrieving the newly created item..."
       )
+    },
+
+    save: function ItemServiceSave(items, callback) {
+      HTTPService.post(
+        "items.php",
+        {a: "save", items: JSON.stringify(items)},
+        callback,
+        "There was an error while saving items..."
+      )
     }
   }
 }])

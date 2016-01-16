@@ -1,48 +1,36 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div ng-controller="DashController" layout="column" flex>
-    <form action="javascript:void(0)" ng-submit="addItem()">
-      <div layout="row">
-        <md-input-container class="md-block" flex>
-          <label>Create New Item</label>
-          <input ng-model="newItemTitle">
-        </md-input-container>
-        <md-button>Create</md-button>
-      </div>
-    </form>
-    <md-list>
-      <md-list-item ng-repeat="i in items | filter:currentItem" ng-click="selectItem(i)">
-        <p>{{ i.title }}</p>
-        <md-checkbox class="md-secondary">View</md-checkbox>
-      </md-list-item>
-    </md-list>
-  
-    <!--
-    <ul class="collection with-header">
-      <li class="collection-header" ng-hide="!selected">
-        <i class="material-icons right" ng-click="deleteItem()">delete</i>
-        <i class="material-icons" ng-click="goBack()">arrow_back</i>
-        <h4>{{ selected.title }}</h4>
-        <p>{{ selected.description }}</p>
-      </li>
-      <li class="collection-item">
-        <form action="javascript:void(0)" method="POST" ng-submit="addItem()">
-          <input type="text" id="new-item-input" ng-model="newItemTitle" placeholder="Create new item" />
+  <div ng-controller="DashController as dash" layout="column" flex>
+    <md-tabs md-border-bottom>
+      <md-tab ng-click="dash.selectTab(t)" ng-repeat="t in dash.tabs">{{ t.item.title }}</md-tab>
+      <md-tab ng-click="dash.addTab()">+</md-tab>
+    </md-tabs>
+    <md-card>
+      <md-card-title>
+        <md-card-title-text layout="row">
+          <md-button ng-click="dash.goBack()" flex="initial">Back</md-button>
+          <span class="md-headline" flex>{{ dash.citem.title }}</span>
+          <md-button ng-click="dash.saveItems()">Save</md-button>
+        </md-card-title-text>
+      </md-card-title>
+      <md-card-content>
+        <form action="javascript:void(0)" ng-submit="dash.addItem()">
+          <div layout="row">
+            <md-input-container class="md-block" flex>
+              <label>Create New Item</label>
+              <input ng-model="dash.newItemTitle">
+            </md-input-container>
+            <md-button>Create</md-button>
+          </div>
         </form>
-      </li>
-      <li ng-repeat="i in items | filter:currentItem" class="collection-item" ng-click="selectItem(i)">
-        <div class="row" style="margin-bottom:0">
-          <div class="col s11 l11">
-            {{ i.title }}
-          </div>
-          <div class="col s1 l1">
-            <input type="checkbox" id="item-{{i.public_id}}-checkbox" class="filled-in" ng-click="checkItem(i)" />
-            <label for="item-{{i.public_id}}-checkbox"></label>
-          </div>
-        </div>
-      </li>
-    </ul>
-    -->
+        <md-list>
+          <md-list-item ng-repeat="i in dash.items | filter:dash.isChildOfCurrent" ng-click="dash.selectChild(i)">
+            <p>{{ i.title }}</p>
+            <md-checkbox class="md-secondary" ng-model="i.complete" ng-click="dash.touchItem(i)"></md-checkbox>
+          </md-list-item>
+        </md-list>
+      </md-card-content>
+    </md-card>
   </div>
 {% endblock %}

@@ -1,40 +1,109 @@
-app.controller("DashController", ["$scope", "ItemService", function($scope, ItemService){
+function DashCtrl($scope, ItemService, RootItem) {
+  var vm = this
 
-  // Get items from server
-  $scope.items = []
-  ItemService.dump(function(items){ $scope.items = items })
+  // == Data
+  vm.items = []
+  vm.tabs = []
+  vm.citem;      // Currently selected item
+  vm.ctab;       // Currently selected tab
 
-  // Set up views
-  $scope.tabs = [null]  // Default tab shows top-level items
-  $scope.currentTab = 0;
-  $scope.currentItem = function(v,i,a){ return (!(titem=$scope.tabs[$scope.currentTab]))?v.parent==null:v.parent==titem.id }
+  // == Methods
+  vm.initialize = initialize
+  vm.getDump = getDump
+  vm.initializeTabs = initializeTabs
+  vm.isChildOfCurrent = isChildOfCurrent
+  vm.selectChild = selectChild
+  vm.selectTab = selectTab
+  vm.selectItem = selectItem
+  vm.addTab = addTab
+  vm.removeTab = removeTab
+  vm.touchItem = touchItem
+  vm.goBack = goBack
+  vm.addItem = addItem
+  vm.saveItems = saveItems
 
-  $scope.selectItem = function(item) {
-    item.parent_object = $scope.tabs[$scope.currentTab]
-    $scope.tabs[$scope.currentTab] = item
+  function initialize() {
+    vm.getDump()
+    vm.initializeTabs()
   }
 
-  $scope.goBack = function() {
-    par = $scope.selected.parent_object
-    if (par === undefined) {
-      // TODO -- If parent not memoized, track them down
-      alert("There was a data problem. This will eventually get fixed, but for now, please reload the page.")
-      return 1
+  function getDump() {
+    vm.items = []
+    ItemService.dump(function(items){ vm.items = items })
+  }
+
+  function initializeTabs() {
+    vm.tabs = []
+    vm.addTab()
+  }
+
+  function isChildOfCurrent(item) {
+    return item.parent == vm.citem.id
+  }
+
+  function selectChild(item) {
+    item.parent_object = vm.citem
+    vm.selectItem(item)
+  }
+
+  function selectTab(tab) {
+    vm.ctab = tab
+    vm.selectItem(tab.item)
+  }
+
+  function selectItem(item) {
+    vm.ctab.item = vm.citem = item
+  }
+
+  function addTab() {
+    vm.selectTab(vm.tabs[vm.tabs.push({item:RootItem})-1])
+  }
+
+  function removeTab() {
+    vm.tabs.splice(tabs.indexof(tab),1)
+  }
+
+  function touchItem(i) {
+    i.changed = true
+  }
+
+  function goBack() {
+    if(par = vm.citem.parent_object) {
+      vm.selectItem(par)
+    } else {
+      alert("There was an error!")
     }
-
-    $scope.selected = par
-    $scope.sid = par?par.id:null
   }
 
-  $scope.addItem = function() {
+  // Tell ItemService to add a new item
+  function addItem() {
     ItemService.add(
-      $scope.newItemTitle,
-      $scope.sid,
-      function(item) {$scope.items.push(item)}
+      vm.newItemTitle,
+      vm.citem.id,
+      function(item) {vm.items.push(item) }
     )
-    $scope.newItemTitle = ""
+    vm.newItemTitle = ""
   }
 
-}])
+  // Round up changed items and tell ItemService to commit them to the server
+  function saveItems() {
+    changed = $.map(vm.items, function(e){return e.changed&&e})
+    if(changed.length) {
+      console.log("Saving "+changed.length+" items...")
+      ItemService.save(
+        changed,
+        function() {
+          $.each(vm.items,function(idx){vm.items[idx].changed=false})
+          console.log("Saved!")
+        }
+      )
+    } else { console.log("Didn't have to save anything...") }
+  }
+
+  vm.initialize()
+}
 
 
+DashCtrl.$inject = ["$scope", "ItemService", "RootItem"]
+
+app.controller('DashController', DashCtrl)

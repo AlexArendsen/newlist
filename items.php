@@ -15,7 +15,8 @@
             "public_id" => $public_id,
             "title" => $title,
             "description" => $description,
-            "parent" => $parent
+            "parent" => $parent,
+            "complete" => false
           );
         }
         return json_encode($out);
@@ -82,6 +83,11 @@
     }
   }
 
+  function save_items($i, $items) {
+    $items = json_decode($items, true);
+    // TODO -- Pick up here
+  }
+
   $action = array_get($_POST, "a", "dump");
   error_log(print_r($_POST, true));
   switch($action) {
@@ -90,6 +96,9 @@
       break;
     case 'add':
       echo add_item($i, $_POST['title'], $_POST['parent']);
+      break;
+    case 'save':
+      echo save_items($i, $_POST['items']);
       break;
   }
   
