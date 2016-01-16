@@ -80,7 +80,7 @@ function DashCtrl($scope, ItemService, RootItem) {
     ItemService.add(
       vm.newItemTitle,
       vm.citem.id,
-      function(item) {vm.items.push(item) }
+      function(item) { vm.items.push(item) }
     )
     vm.newItemTitle = ""
   }
@@ -93,7 +93,7 @@ function DashCtrl($scope, ItemService, RootItem) {
       ItemService.save(
         changed,
         function() {
-          $.each(vm.items,function(idx){vm.items[idx].changed=false})
+          $.each(vm.items, function(idx){vm.items[idx].changed=false})
           console.log("Saved!")
         }
       )

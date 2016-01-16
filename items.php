@@ -2,10 +2,9 @@
   require_once 'init.php';
 
   function get_items($i) {
-    error_log("Dumping items");
-    if($s=$i->prepare("SELECT ID, PUBLIC_ID, TITLE, DESCRIPTION, PARENT FROM ITEMS WHERE OWNER = ?")) {
+    if($s=$i->prepare("SELECT ID, PUBLIC_ID, TITLE, DESCRIPTION, PARENT, COMPLETE FROM ITEMS WHERE OWNER = ?")) {
       $s->bind_param('i',$_SESSION['user-id']);
-      $s->bind_result($id, $public_id, $title, $description, $parent);
+      $s->bind_result($id, $public_id, $title, $description, $parent, $complete);
       if($s->execute()) {
         // Query success
         $out = array();
@@ -16,7 +15,7 @@
             "title" => $title,
             "description" => $description,
             "parent" => $parent,
-            "complete" => false
+            "complete" => $complete == 1
           );
         }
         return json_encode($out);
@@ -34,7 +33,6 @@
   }
 
   function get_item($i, $public_id) {
-    error_log("Fetching item");
     if($s=$i->prepare("SELECT ID, PUBLIC_ID, TITLE, DESCRIPTION, PARENT FROM ITEMS WHERE OWNER = ? AND PUBLIC_ID = ?")) {
       $s->bind_param('is',$_SESSION['user-id'], $public_id);
       $s->bind_result($id, $public_id, $title, $description, $parent);
@@ -61,14 +59,12 @@
   }
 
   function add_item($i, $title, $parent) {
-    error_log("Adding new item...");
     $uuid = uniqid();
     if($s=$i->prepare("INSERT INTO ITEMS (PUBLIC_ID, TITLE, PARENT, OWNER) VALUES (?,?,?,?)")) {
       if (!$parent) { $parent = null;  }
       $s->bind_param("ssii", $uuid, $title, $parent, $_SESSION['user-id']);
       if($s->execute()) {
         // Query success
-        error_log("New item created successfully");
         return get_item($i, $uuid);
       } else {
         // Execution Failure
@@ -85,11 +81,23 @@
 
   function save_items($i, $items) {
     $items = json_decode($items, true);
-    // TODO -- Pick up here
+    $errors = array();
+    if($s=$i->prepare("UPDATE ITEMS SET TITLE = ?, COMPLETE = ? WHERE ID = ? AND OWNER = ?")) {
+      foreach ($items as $i) {
+        error_log(print_r($i, true));
+        $s->bind_param('siis',$i['title'], $i['complete'], $i['id'], $_SESSION['user-id']);
+        if(!$s->execute()) { $errors[] = $i->error; }
+      }
+      $s->close();
+      if(count($errors)) {
+        error_log("Encountered errors while saving items: ".print_r($errors, true));
+      }
+    } else {
+      error_log("There was an error while preparing the item save statement: $i->error");
+    }
   }
 
   $action = array_get($_POST, "a", "dump");
-  error_log(print_r($_POST, true));
   switch($action) {
     case 'dump':
       echo get_items($i);

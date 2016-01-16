@@ -29,10 +29,6 @@
 <body ng-app="newlist">
   <div ng-controller="GeneralController" layout="column">
 
-    {% if loggedIn %}
-      {% include "nav.html" %}
-    {% endif %}
-
     <div layout="row">
       <div flex="100" flex-gt-sm="60" flex-offset-gt-sm="20">
         {% block content %}
