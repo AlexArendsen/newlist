@@ -11,9 +11,9 @@
         while($s->fetch()) {
           $out[] = array(
             "id" => $id,
-            "public_id" => $public_id,
+            // "public_id" => $public_id,
             "title" => $title,
-            "description" => $description,
+            // "description" => $description,
             "parent" => $parent,
             "complete" => $complete == 1
           );
@@ -33,17 +33,18 @@
   }
 
   function get_item($i, $public_id) {
-    if($s=$i->prepare("SELECT ID, PUBLIC_ID, TITLE, DESCRIPTION, PARENT FROM ITEMS WHERE OWNER = ? AND PUBLIC_ID = ?")) {
+    if($s=$i->prepare("SELECT ID, PUBLIC_ID, TITLE, DESCRIPTION, PARENT, COMPLETE FROM ITEMS WHERE OWNER = ? AND PUBLIC_ID = ?")) {
       $s->bind_param('is',$_SESSION['user-id'], $public_id);
-      $s->bind_result($id, $public_id, $title, $description, $parent);
+      $s->bind_result($id, $public_id, $title, $description, $parent, $complete);
       if($s->execute() && $s->fetch()) {
         // Query success
         return json_encode(array(
           "id" => $id,
-          "public_id" => $public_id,
+          // "public_id" => $public_id,
           "title" => $title,
-          "description" => $description,
-          "parent" => $parent
+          // "description" => $description,
+          "parent" => $parent,
+          "complete" => $complete == 1
         ));
       } else {
         // Execution Failure
