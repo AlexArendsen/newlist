@@ -1,7 +1,17 @@
-app.factory("ErrorService", ["$mdToast", function($mdToast){
-  return {
-    error: function(message) {
-      $mdToast.show($mdToast.simple().textContent(message||"(Error without message provided)"))
+(function() {
+  'use strict';
+
+  angular
+    .module('newlist')
+    .factory('ErrorService', ErrorService)
+
+  function ErrorService() {
+    return {
+      error: function(message) {
+        $mdToast.show($mdToast.simple().textContent(message||"(Error without message provided)"))
+      }
     }
   }
-}])
+
+  ErrorService.$inject = ["$mdToast"]
+})()

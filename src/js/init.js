@@ -1,2 +1,3 @@
-var app = angular.module('newlist', ['ngMaterial'])
-
+angular.module('newlist', [
+  'ngMaterial'
+])
