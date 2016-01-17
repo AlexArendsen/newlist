@@ -14,7 +14,7 @@
           type: "POST",
           success: function(res){
             try { callback(JSON.parse(res)); $rootScope.$apply() }
-            catch(e) { ErrorService.error(res) }
+            catch(e) { ErrorService.error(res); console.error(e) }
           },
           error: ErrorService.error
         })
@@ -23,4 +23,4 @@
   }
 
   HTTPService.$inject = ["$rootScope", "ErrorService"]
-})()
+})();

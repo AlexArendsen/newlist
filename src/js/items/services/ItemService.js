@@ -37,4 +37,4 @@
   }
 
   ItemService.$inject = ["HTTPService", "ErrorService"]
-})()
+})();

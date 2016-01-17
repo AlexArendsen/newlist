@@ -8,4 +8,4 @@
       title: "Home",
       parent: null
     })
-})()
+})();

@@ -10,8 +10,8 @@
       <md-card-title>
         <md-card-title-text layout="row">
           <md-button ng-click="dash.goBack()" flex="initial">Back</md-button>
-          <span class="md-headline" flex>{{ dash.citem.title }}</span>
-          <md-button ng-click="dash.saveItems()">Save</md-button>
+          <span class="md-headline" flex>{{ dash.cnode.item.title }} ({{ dash.itemProgress(dash.cnode.item) }}%)</span>
+          <md-button ng-click="dash.saveItems($event)">Save</md-button>
         </md-card-title-text>
       </md-card-title>
       <md-card-content>
@@ -25,9 +25,9 @@
           </div>
         </form>
         <md-list>
-          <md-list-item ng-repeat="i in dash.items | filter:dash.isChildOfCurrent" ng-click="dash.selectChild(i)">
-            <p>{{ i.title }}</p>
-            <md-checkbox class="md-secondary" ng-model="i.complete" ng-click="dash.touchItem(i)"></md-checkbox>
+          <md-list-item ng-repeat="i in dash.cnode.children" ng-click="dash.selectItem(i)">
+            <p>{{ dash.itemProgress(i) }}% <strong>{{ i.title }}</strong> - {{ i.childrenCompleted }} / {{ i.childrenTotal }}</p>
+            <md-checkbox class="md-secondary" ng-model="i.complete" ng-click="dash.checkItem(i)"></md-checkbox>
           </md-list-item>
         </md-list>
       </md-card-content>
