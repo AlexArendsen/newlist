@@ -11,7 +11,20 @@
         <md-card-title-text layout="row">
           <md-button ng-click="dash.goBack()" flex="initial">Back</md-button>
           <span class="md-headline" flex>{{ dash.cnode.item.title }} ({{ dash.itemProgress(dash.cnode.item) }}%)</span>
-          <md-button ng-click="dash.saveItems($event)">Save</md-button>
+          <md-menu>
+            <md-button ng-click="$mdOpenMenu($event)">O</md-button>
+            <md-menu-content>
+              <md-menu-item>
+                <md-button ng-click="dash.saveItems($event)"> Save </md-button>
+              </md-menu-item>
+              <md-menu-item>
+                <md-button ng-click="dash.archiveCompleted(dash.cnode.item)"> Archive Completed </md-button>
+              </md-menu-item>
+              <md-menu-item>
+                <md-button ng-click="dash.tally()"> Retally </md-button>
+              </md-menu-item>
+            </md-menu-content>
+          </md-menu>
         </md-card-title-text>
       </md-card-title>
       <md-card-content>
@@ -25,7 +38,7 @@
           </div>
         </form>
         <md-list>
-          <md-list-item ng-repeat="i in dash.cnode.children" ng-click="dash.selectItem(i)">
+          <md-list-item ng-repeat="i in dash.cnode.children | filter:dash.isShowable" ng-click="dash.selectItem(i)">
             <p>{{ dash.itemProgress(i) }}% <strong>{{ i.title }}</strong> - {{ i.childrenCompleted }} / {{ i.childrenTotal }}</p>
             <md-checkbox class="md-secondary" ng-model="i.complete" ng-click="dash.checkItem(i)"></md-checkbox>
           </md-list-item>

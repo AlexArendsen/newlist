@@ -7,7 +7,6 @@
   }
 
   function check_login($i, $twig, $args) {
-    error_log("Attempting to log in");
     if($s=$i->prepare("SELECT ID, PASSWORD, USERNAME FROM USERS WHERE USERNAME = ?")) {
       $s->bind_param('s',$_POST['username']);
       $s->bind_result($uid, $upass, $uname);

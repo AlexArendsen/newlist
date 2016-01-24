@@ -2,7 +2,7 @@
   require_once 'init.php';
 
   function get_items($i) {
-    if($s=$i->prepare("SELECT ID, PUBLIC_ID, TITLE, DESCRIPTION, PARENT, COMPLETE FROM ITEMS WHERE OWNER = ?")) {
+    if($s=$i->prepare("SELECT ID, PUBLIC_ID, TITLE, DESCRIPTION, PARENT, COMPLETE FROM ITEMS WHERE OWNER = ? AND ARCHIVED = 0")) {
       $s->bind_param('i',$_SESSION['user-id']);
       $s->bind_result($id, $public_id, $title, $description, $parent, $complete);
       if($s->execute()) {
@@ -85,7 +85,6 @@
     $errors = array();
     if($s=$i->prepare("UPDATE ITEMS SET TITLE = ?, COMPLETE = ? WHERE ID = ? AND OWNER = ?")) {
       foreach ($items as $i) {
-        error_log(print_r($i, true));
         $s->bind_param('siis',$i['title'], $i['complete'], $i['id'], $_SESSION['user-id']);
         if(!$s->execute()) { $errors[] = $i->error; }
       }
@@ -98,6 +97,23 @@
     }
   }
 
+  function archive_items($i, $ids) {
+    $ids = json_decode($ids);
+    if($s=$i->prepare("UPDATE ITEMS SET ARCHIVED = 1 WHERE ID = ? AND OWNER = ?")) {
+      foreach ($ids as $i) {
+        $s->bind_param('is',$i, $_SESSION['user-id']);
+        if(!$s->execute()) { $errors[] = $i->error; }
+      }
+      $s->close();
+      if(count($errors)) {
+        error_log("Encountered errors while archiving items: ".print_r($errors, true));
+      }
+    } else {
+      error_log("There was an error while preparing the item archive statement: $i->error");
+    }
+    json_error("There was actually no error...");
+  }
+
   $action = array_get($_POST, "a", "dump");
   switch($action) {
     case 'dump':
@@ -108,6 +124,9 @@
       break;
     case 'save':
       echo save_items($i, $_POST['items']);
+      break;
+    case 'archive':
+      echo archive_items($i, $_POST['ids']);
       break;
   }
   

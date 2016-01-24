@@ -32,6 +32,15 @@
           callback,
           "There was an error while saving items..."
         )
+      },
+
+      archive: function ItemServiceArchive(ids, callback) {
+        HTTPService.post(
+          "items.php",
+          {a: "archive", ids: JSON.stringify(ids)},
+          callback,
+          "There was an error while archiving the completed items..."
+        )
       }
     }
   }

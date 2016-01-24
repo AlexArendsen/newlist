@@ -11,6 +11,7 @@
     // == Data
     vm.tree = {}
     vm.tabs = []
+    vm.changed = {}
     vm.cnode;  // Currently selected node
     vm.ctab;   // Currently selected tab
 
@@ -21,7 +22,8 @@
     vm.initializeTree = initializeTree
     vm.tally = tally
     vm.itemProgress = itemProgress
-    vm.itemPicker = itemPicker
+    vm.isShowable = isShowable
+    // vm.itemPicker = itemPicker
     vm.selectTab = selectTab
     vm.selectItem = selectItem
     vm.addTab = addTab
@@ -29,6 +31,7 @@
     vm.checkItem = checkItem
     vm.goBack = goBack
     vm.addItem = addItem
+    vm.archiveCompleted = archiveCompleted
     vm.saveItems = saveItems
 
     function initialize() {
@@ -73,10 +76,11 @@
     }
 
     function tally(node) {
-      if(!node || !node.item || !node.children){ return [0,0] }
+      if(!node || !node.item || !node.children || node.item.hidden){ return [0,0] }
       node.item.childrenTotal = 0
       node.item.childrenCompleted = 0
       node.children.forEach(function(child){
+        if(child.hidden) { return false; }
         ++node.item.childrenTotal
         var res = vm.tally(vm.tree[child.id])
         node.item.childrenTotal += res[0]
@@ -97,6 +101,10 @@
         :( 100*item.childrenCompleted / (item.childrenTotal || 1) ))
     }
 
+    function isShowable(value, index, array) {
+      return !value.hidden
+    }
+
     function selectTab(tab) {
       vm.ctab = tab
       vm.selectItem(tab.item)
@@ -115,7 +123,9 @@
     }
 
     function checkItem(i) {
-      i.changed = true
+      if(!vm.changed[i.id]) {
+        vm.changed[i.id] = true
+      }
       vm.tally(vm.tree[null])
     }
 
@@ -124,19 +134,7 @@
     }
 
     function itemPicker(ev, callback) {
-      vm.mnode = vm.cnode
-      $mdDialog.show({
-        targetEvent: ev,
-        templateUrl: "templates/itemPicker.html"
-      })
-        .then(
-          function(answer){
-            if(answer=="confirm") {
-              callback(vm.mnode.item)
-            }
-          },
-          function(){}
-        )
+      // TODO -- Make this work
     }
 
     // Tell ItemService to add a new item
@@ -155,19 +153,55 @@
       vm.newItemTitle = ""
     }
 
+    function archiveCompleted(item) {
+      var getAll = function(node) {
+        var out = []
+        node.children.forEach(function(el) {
+          out.push(el)
+          out = $.merge(out, getAll(vm.tree[el.id]))
+        })
+        return out
+      }
+
+      var getCompleted = function(node) {
+        var out = []
+        node.children.forEach(function(el){
+          if (el.complete) {
+            out.push(el)
+            out = $.merge(out, getAll(vm.tree[el.id]))
+          } else {
+            out = $.merge(out, getCompleted(vm.tree[el.id]))
+          }
+        })
+        return out
+      }
+
+      var n = vm.tree[null]
+      if(item && item.id && vm.tree[item.id]) {
+        n = vm.tree[item.id]
+      }
+      var items = getCompleted(n)
+      ItemService.archive(
+        $.map(items, function(e){return e.id}),
+        function() {
+          $.each(items, function(i,e) {e.hidden = true})
+          vm.tally(vm.tree[null])
+        }
+      )
+    }
+
     // Round up changed items and tell ItemService to commit them to the server
     function saveItems(ev) {
-      //var changed = $.map(vm.items, function(e){return e.changed&&e})
-      //if(changed.length) {
-      //  console.log("Saving "+changed.length+" items...")
-      //  ItemService.save(
-      //    changed,
-      //    function() {
-      //      $.each(vm.items, function(idx){vm.items[idx].changed=false})
-      //      console.log("Saved!")
-      //    }
-      //  )
-      //} else { console.log("Didn't have to save anything...") }
+      var changed = $.map(vm.changed, function(e,i){return vm.tree[i].item})
+      if(changed.length) {
+        ItemService.save(
+          changed,
+          function() {
+            vm.changed = {}
+            console.log("Saved!")
+          }
+        )
+      }
     }
 
     vm.initialize()
