@@ -29,6 +29,7 @@
     vm.addTab = addTab
     vm.removeTab = removeTab
     vm.checkItem = checkItem
+    vm.touchItem = touchItem
     vm.goBack = goBack
     vm.addItem = addItem
     vm.archiveCompleted = archiveCompleted
@@ -123,10 +124,13 @@
     }
 
     function checkItem(i) {
-      if(!vm.changed[i.id]) {
-        vm.changed[i.id] = true
-      }
+      vm.touchItem(i)
       vm.tally(vm.tree[null])
+    }
+
+    function touchItem(i) {
+      vm.changed[i.id] = true
+      console.log("Item "+i.title+" touched")
     }
 
     function goBack() {

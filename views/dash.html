@@ -10,9 +10,14 @@
       <md-card-title>
         <md-card-title-text layout="row">
           <md-button ng-click="dash.goBack()" flex="initial">Back</md-button>
-          <span class="md-headline" flex>{{ dash.cnode.item.title }} ({{ dash.itemProgress(dash.cnode.item) }}%)</span>
+          <div layout="column" flex>
+            <span class="md-headline" flex>
+              <md-input-container>
+                <input ng-model="dash.cnode.item.title" ng-change="dash.touchItem(dash.cnode.item)" ng-disabled="dash.cnode.item.id==null"> </md-input-container>
+            </span>
+          </div>
           <md-menu>
-            <md-button ng-click="$mdOpenMenu($event)">O</md-button>
+            <md-button ng-click="$mdOpenMenu($event)">{{ dash.itemProgress(dash.cnode.item) }}%</md-button>
             <md-menu-content>
               <md-menu-item>
                 <md-button ng-click="dash.saveItems($event)"> Save </md-button>
